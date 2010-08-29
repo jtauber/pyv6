@@ -46,6 +46,5 @@ run("grep ten /foo")
 run("grep ^ten /foo")
 run("grep ^con /foo")
 
-# run("mkfs")
 # run("sh")
 # run("usertests")
