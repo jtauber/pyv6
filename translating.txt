@@ -14,7 +14,7 @@ Obviously something like:
 
 just becomes:
     
-    def cat(id):
+    def cat(fd):
 
 
 At the moment, I'm quite literally translating things like:
