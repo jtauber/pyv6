@@ -49,6 +49,8 @@ class MockFileSystem:
         self.fds = {}
     
     def open(self, path, mode):
+        if path not in self.files:
+            return -1
         next_fd = len(self.fds) + 3
         self.fds[next_fd] = (path, mode, 0, self.files[path])
         return next_fd
