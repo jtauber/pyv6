@@ -1,16 +1,17 @@
 # Simple grep.  Only supports ^ . * $ operators.
 
-from user import open_
+from user import open_, read, close, exit_, write
+from ulib import strchr
 
-
-# char buf[1024];
 
 def grep(pattern, fd):
-    m = 0;
+    m = 0
+    buf = " " * 1024
+    
     # while (n = read(fd, buf+m, sizeof(buf)-m)) > 0
     while True:
-        # @@@ read changed to return tuple
-        n, buf[m:] = read(fd, sizeof(buf) - m)
+        n, s = read(fd, 1024 - m)
+        buf = buf[:m] + s
         if n <= 0: break
         
         m += n
@@ -21,18 +22,19 @@ def grep(pattern, fd):
             q = strchr(p, "\n")
             if q == 0: break
             
-            q[0] = 0
+            q = "\0" + q[1:]
             if match(pattern, p):
-                q[0] = "\n"
-                write(1, p, q + 1 - p) # @@@
+                q = "\n" + q[1:]
+                write(1, p, len(p) + 1 - len(q))
             
             p = q[1:]
         
         if p == buf:
             m = 0
         if m > 0:
-            m -= p - buf # @@@
-            memmove(buf, p, m)
+            m -= len(p) - len(buf)
+            # memmove(buf, p, m)
+            buf = p[:m] + buf[m:]
 
 
 def main(argc, argv):
