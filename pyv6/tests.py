@@ -21,7 +21,7 @@ def run(line):
     cmd = l_split[0]
     main = __import__("bin." + cmd, fromlist=["main"]).main
     try:
-        main(len(l_split), [s + "\0" for s in line.split()])
+        main(len(l_split), l_split)
     except Exit:
         return
     # if we get here we *should* have seen an Exit but didn't
