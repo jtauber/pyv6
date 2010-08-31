@@ -3,7 +3,7 @@
 from user import open_, read, fork, wait, chdir, exit_
 from user import O_RDWR
 from printf import printf
-from ulib import gets, strlen
+from ulib import gets, strlen, strchr
 
 
 # 
@@ -20,9 +20,8 @@ from ulib import gets, strlen
 
 EXEC = 1
 
-# 
-# #define MAXARGS 10
-# 
+MAXARGS = 10
+
 
 class Cmd:
     pass
@@ -31,8 +30,7 @@ class Cmd:
 class ExecCmd:
     def __init__(self):
         self.type = EXEC
-        self.argv = [None]
-        self.eargv = [None]
+        self.argv = [None] * MAXARGS
 
 
 # struct redircmd {
@@ -173,13 +171,12 @@ def main(argv, argc):
     
     exit_()
 
-# void
-# panic(char *s)
-# {
-#   printf(2, "%s\n", s);
-#   exit();
-# }
-# 
+
+def panic(s):
+    raise Exception
+    printf(2, "%s\n", s)
+    exit_()
+
 
 def fork1():
     pid = fork()
@@ -243,93 +240,88 @@ def fork1():
 #   cmd->cmd = subcmd;
 #   return (struct cmd*)cmd;
 # }
-# // Parsing
-# 
-# char whitespace[] = " \t\r\n\v";
-# char symbols[] = "<|>&;()";
-# 
-# int
-# gettoken(char **ps, char *es, char **q, char **eq)
-# {
-#   char *s;
-#   int ret;
-#   
-#   s = *ps;
-#   while(s < es && strchr(whitespace, *s))
-#     s++;
-#   if(q)
-#     *q = s;
-#   ret = *s;
-#   switch(*s){
-#   case 0:
-#     break;
-#   case '|':
-#   case '(':
-#   case ')':
-#   case ';':
-#   case '&':
-#   case '<':
-#     s++;
-#     break;
-#   case '>':
-#     s++;
-#     if(*s == '>'){
-#       ret = '+';
-#       s++;
-#     }
-#     break;
-#   default:
-#     ret = 'a';
-#     while(s < es && !strchr(whitespace, *s) && !strchr(symbols, *s))
-#       s++;
-#     break;
-#   }
-#   if(eq)
-#     *eq = s;
-#   
-#   while(s < es && strchr(whitespace, *s))
-#     s++;
-#   *ps = s;
-#   return ret;
-# }
 
-def peek(ps, es, toks): pass
-    # char *s;
+
+# Parsing
+
+
+WHITESPACE = " \t\r\n\v"
+SYMBOLS = "<|>&;()"
+
+
+def gettoken(st, ps, es):
+
+    s = ps
+    while s < es and strchr(WHITESPACE, st[s]):
+        s += 1
     
-    # s = *ps;
-    # while(s < es && strchr(whitespace, *s))
-    #     s++;
-    # *ps = s;
-    # return *s && strchr(toks, *s);
-
-# struct cmd *parseline(char**, char*);
-# struct cmd *parsepipe(char**, char*);
-# struct cmd *parseexec(char**, char*);
-# struct cmd *nulterminate(struct cmd*);
-# 
-
-
-def parsecmd(s):
-    # char *es;
-    # struct cmd *cmd;
+    q = s
     
-    # es = s + strlen(s)
-    cmd = parseline(s, None)
+    ret = st[s]
     
-    # peek(&s, es, "")
-    # 
-    # if s != es:
-    #     printf(2, "leftovers: %s\n", s)
-    #     panic("syntax")
-    # # nulterminate(cmd)
+    if st[s] == "\0": # @@@ can this happen?
+        pass
+    elif st[s] in "|();&<":
+        s += 1
+    elif st[s] == ">":
+        s += 1
+        if st[s] == ">":
+            ret = "+"
+            s += 1
+    else:
+        ret = "a"
+        while s < es and not strchr(WHITESPACE, st[s]) and not strchr(SYMBOLS, st[s]):
+            s += 1
     
-    return cmd
+    eq = s
+    
+    while s < es and strchr(WHITESPACE, st[s]):
+        s += 1
+    
+    ps = s
+    
+    return ret, ps, q, eq
 
 
-def parseline(ps, es):
-    # struct cmd *cmd;
+def peek(st, ps, es, toks):
+    print "peek", repr(st), ps, es, repr(toks)
     
-    cmd = parsepipe(ps, es)
+    s = ps
+    while s < es and strchr(WHITESPACE, st[s]):
+        s += 1
+    ps = s
+    
+    print st[s] != "\0"
+    
+    return (st[s] != "\0") and (strchr(toks, st[s]) != 0), ps
+
+
+def parsecmd(st):
+    s = 0
+    es = s + strlen(st)
+    
+    print "parsecmd", repr(st), s, es
+    
+    cmd, s = parseline(st, s, es)
+    
+    print repr(st), s, es, st[s:es]
+    
+    dummy, s = peek(st, s, es, "\0")
+
+    print repr(st), s, es, st[s:es]
+
+    if s != es:
+        printf(2, "leftovers: %s\n", st)
+        panic("syntax")
+    
+    # nulterminate(cmd)
+    
+    return cmd, ps
+
+
+def parseline(st, ps, es):
+    
+    cmd, ps = parsepipe(st, ps, es)
     
     # while peek(ps, es, "&"):
     #     gettoken(ps, es, 0, 0);
@@ -339,41 +331,42 @@ def parseline(ps, es):
     #     gettoken(ps, es, 0, 0);
     #     cmd = listcmd(cmd, parseline(ps, es));
     
-    return cmd
+    return cmd, ps
 
 
 
-def parsepipe(ps, es):
-    # struct cmd *cmd;
+def parsepipe(st, ps, es):
     
-    cmd = parseexec(ps, es)
+    cmd, ps = parseexec(st, ps, es)
     
     # if peek(ps, es, "|"):
     #     gettoken(ps, es, 0, 0)
     #     cmd = pipecmd(cmd, parsepipe(ps, es))
     
-    return cmd
+    return cmd, ps
 
 
-def parseredirs(cmd, ps, es):
-    # int tok;
-    # char *q, *eq;
+def parseredirs(cmd, st, ps, es):
     
-    while peek(ps, es, "<>"):
-        tok = gettoken(ps, es, 0, 0)
+    while True:
+        dummy, ps = peek(st, ps, es, "<>")
+        if not dummy: break
         
-        x, q, eq = gettoken(ps, es)
-        if x != "a":
-            panic("missing file for redirection")
-        
-        if tok == "<":
-            cmd = redircmd(cmd, q, eq, O_RDONLY, 0)
-        elif tok == ">":
-            cmd = redircmd(cmd, q, eq, O_WRONLY|O_CREATE, 1)
-        elif tok == "+":
-            cmd = redircmd(cmd, q, eq, O_WRONLY|O_CREATE, 1)
+        assert False
+        # tok, ps, q, eq = gettoken(st, ps, es)
+        # 
+        # if tok != "a":
+        #     panic("missing file for redirection")
+        # 
+        # if tok == "<":
+        #     cmd = redircmd(cmd, st, q, eq, O_RDONLY, 0) # st[q:eq] rather than st, q, eq
+        # elif tok == ">":
+        #     cmd = redircmd(cmd, st, q, eq, O_WRONLY|O_CREATE, 1)
+        # elif tok == "+":
+        #     cmd = redircmd(cmd, st, q, eq, O_WRONLY|O_CREATE, 1)
     
-    return cmd
+    return cmd, ps
+
 
 # struct cmd*
 # parseblock(char **ps, char *es)
@@ -392,11 +385,7 @@ def parseredirs(cmd, ps, es):
 # }
 
 
-def parseexec(ps, es):
-    # char *q, *eq;
-    # int tok, argc;
-    # struct execcmd *cmd;
-    # struct cmd *ret;
+def parseexec(st, ps, es):
     
     # if(peek(ps, es, "("))
     #     return parseblock(ps, es);
@@ -404,24 +393,29 @@ def parseexec(ps, es):
     cmd = ExecCmd()
     
     argc = 0
-    cmd = parseredirs(cmd, ps, es)
+    cmd, ps = parseredirs(cmd, st, ps, es)
     
-    # while(!peek(ps, es, "|)&;")){
-    #     if((tok=gettoken(ps, es, &q, &eq)) == 0)
-    #         break;
-    #     if(tok != 'a')
-    #         panic("syntax");
-    #     cmd->argv[argc] = q;
-    #     cmd->eargv[argc] = eq;
-    #     argc++;
-    #     if(argc >= MAXARGS)
-    #         panic("too many args");
-    #     ret = parseredirs(ret, ps, es);
+    while True:
+        dummy, ps = peek(st, ps, es, "|)&;")
+        if dummy: break
+        
+        tok, ps, q, eq = gettoken(st, ps, es)
+        
+        if tok == "\0":
+            break
+        if tok != "a":
+            panic("syntax")
+        cmd.argv[argc] = st[q:eq]
+        argc += 1
+        
+        if argc >= MAXARGS:
+            panic("too many args")
+        
+        cmd, ps = parseredirs(cmd, st, ps, es)
     
-    cmd.argv[argc] = 0
-    cmd.eargv[argc] = 0
+    cmd.argv[argc] = ""
     
-    return cmd
+    return cmd, ps
 
 
 # // NUL-terminate all the counted strings.
