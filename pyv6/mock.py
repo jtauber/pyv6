@@ -57,7 +57,8 @@ class MockFileSystem:
     
     def read(self, fd, max_size):
         if fd == 0:
-            assert False
+            buf = sys.stdin.read(max_size)
+            return len(buf), buf
         elif fd == 1:
             sys.stdout.write(buf[:length])
         elif fd == 2:

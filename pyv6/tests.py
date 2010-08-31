@@ -45,6 +45,6 @@ run("ls /biz")
 run("grep ten /foo")
 run("grep ^ten /foo")
 run("grep ^con /foo")
+run("sh")
 
-# run("sh")
 # run("usertests")

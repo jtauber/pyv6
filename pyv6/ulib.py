@@ -1,4 +1,4 @@
-from user import open_, O_RDONLY, fstat, close
+from user import open_, O_RDONLY, fstat, close, read
 
 # #include "types.h"
 # #include "stat.h"
@@ -50,23 +50,20 @@ def strchr(s, c):
         s = s[1:]
     return 0
 
-# char*
-# gets(char *buf, int max)
-# {
-#   int i, cc;
-#   char c;
-# 
-#   for(i=0; i+1 < max; ){
-#     cc = read(0, &c, 1);
-#     if(cc < 1)
-#       break;
-#     buf[i++] = c;
-#     if(c == '\n' || c == '\r')
-#       break;
-#   }
-#   buf[i] = '\0';
-#   return buf;
-# }
+
+def gets(max_length):
+    
+    buf = ""
+    for i in range(max_length):
+        cc, c = read(0, 1)
+        if cc < 1:
+            break
+        buf += c
+        if c == "\n" or c == "\r":
+            break
+    buf += "\0"
+    return len(buf), buf
+
 
 def stat(name):
     fd = open_(name, O_RDONLY)
