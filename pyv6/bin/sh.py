@@ -306,7 +306,7 @@ def parsecmd(st):
     
     # nulterminate(cmd)
     
-    return cmd, s
+    return cmd
 
 
 def parseline(st, ps, es):
