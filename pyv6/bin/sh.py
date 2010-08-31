@@ -284,14 +284,10 @@ def gettoken(st, ps, es):
 
 
 def peek(st, ps, es, toks):
-    print "peek", repr(st), ps, es, repr(toks)
-    
     s = ps
     while s < es and strchr(WHITESPACE, st[s]):
         s += 1
     ps = s
-    
-    print st[s] != "\0"
     
     return (st[s] != "\0") and (strchr(toks, st[s]) != 0), ps
 
@@ -300,23 +296,17 @@ def parsecmd(st):
     s = 0
     es = s + strlen(st)
     
-    print "parsecmd", repr(st), s, es
-    
     cmd, s = parseline(st, s, es)
     
-    print repr(st), s, es, st[s:es]
-    
     dummy, s = peek(st, s, es, "\0")
-
-    print repr(st), s, es, st[s:es]
-
+    
     if s != es:
         printf(2, "leftovers: %s\n", st)
         panic("syntax")
     
     # nulterminate(cmd)
     
-    return cmd, ps
+    return cmd, s
 
 
 def parseline(st, ps, es):
