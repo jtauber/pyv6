@@ -7,8 +7,7 @@ def cat(fd):
     # while((n = read(fd, buf, sizeof(buf))) > 0)
     while True:
         n, buf = read(fd, 512)
-        if n <= 0:
-            break
+        if n <= 0: break
         write(1, buf, n)
     
     if n < 0:
@@ -21,7 +20,7 @@ def main(argc, argv):
     
     if argc <= 1:
         cat(0)
-        exit()
+        exit_()
     
     for i in range(1, argc):
         fd = open_(argv[i], 0)
