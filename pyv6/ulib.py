@@ -29,7 +29,7 @@ from user import open_, O_RDONLY, fstat, close, read
 def strlen(s):
     s += "\0" # @@@
     n = 0
-    while s[n:] != "\0":
+    while s[n] != "\0":
         n += 1
     return n
     
