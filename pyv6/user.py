@@ -38,6 +38,8 @@ def close(fd):
 def kill(n): pass
 
 # int exec(char*, char**);
+def exec_(argv0, argv):
+    pass
 
 # int open(char*, int);
 def open_(filename, mode):
