@@ -1,24 +1,22 @@
 # Shell.
 
 from user import open_, read, fork, wait, chdir, exit_, exec_
-from user import O_RDWR
+from user import O_RDWR, O_WRONLY, O_CREATE
 from printf import printf
 from ulib import gets, strlen, strchr
 
 
-# 
 # #include "types.h"
 # #include "user.h"
 # #include "fcntl.h"
-# 
-# // Parsed command representation
-# #define EXEC  1
-# #define REDIR 2
-# #define PIPE  3
-# #define LIST  4
-# #define BACK  5
+
 
 EXEC = 1
+REDIR = 2
+PIPE = 3
+LIST = 4
+BACK = 5
+
 
 MAXARGS = 10
 
@@ -27,51 +25,44 @@ class Cmd:
     pass
 
 
-class ExecCmd:
+class ExecCmd(Cmd):
     def __init__(self):
         self.type = EXEC
         self.argv = [None] * MAXARGS
 
 
-# struct redircmd {
-#   int type;
-#   struct cmd *cmd;
-#   char *file;
-#   char *efile;
-#   int mode;
-#   int fd;
-# };
-# 
-# struct pipecmd {
-#   int type;
-#   struct cmd *left;
-#   struct cmd *right;
-# };
-# 
-# struct listcmd {
-#   int type;
-#   struct cmd *left;
-#   struct cmd *right;
-# };
-# 
-# struct backcmd {
-#   int type;
-#   struct cmd *cmd;
-# };
-# 
-# int fork1(void);  // Fork but panics on failure.
-# void panic(char*);
-# struct cmd *parsecmd(char*);
-# 
+class RedirCmd(Cmd):
+    def __init__(self, subcmd, filename, mode, fd):
+        self.type = REDIR
+        self.cmd = subcmd
+        self.filename = filename
+        self.mode = mode
+        self.fd = fd
+
+
+class PipeCmd(Cmd):
+    def __init__(self, left, right):
+        self.type = PIPE
+        self.left = left
+        self.right = right
+
+
+class ListCmd(Cmd):
+    def __init__(self, left, right):
+        self.type = LIST
+        self.left = left
+        self.right = right
+
+
+class BackCmd(Cmd):
+    def __init__(self, subcmd):
+        self.type = BACK
+        self.cmd = subcmd
+
 
 # Execute cmd.  Never returns.
 def runcmd(cmd):
-    # int p[2];
-    # struct backcmd *bcmd;
-    # struct execcmd *ecmd;
-    # struct listcmd *lcmd;
-    # struct pipecmd *pcmd;
-    # struct redircmd *rcmd;
+    p = [0, 0]
     
     if cmd == 0:
         exit_()
@@ -83,7 +74,7 @@ def runcmd(cmd):
         printf(2, "exec %s failed\n", cmd.argv[0])
         
     elif cmd.type == REDIR:
-        rcmd = redircmd(cmd)
+        rcmd = RedirCmd(cmd) # @@@
         close(rcmd.fd)
         if open_(rcmd.file, rcmd.mode) < 0:
             printf(2, "open %s failed\n", rcmd.file);
@@ -91,14 +82,14 @@ def runcmd(cmd):
         runcmd(rcmd.cmd)
         
     elif cmd.type == LIST:
-        lcmd = listcmd(cmd)
+        lcmd = ListCmd(cmd)
         if fork1() == 0:
             runcmd(lcmd.left)
         wait()
         runcmd(lcmd.right)
         
     elif cmd.type == PIPE:
-        pcmd = pipecmd(cmd)
+        pcmd = PipeCmd(cmd)
         if pipe(p) < 0:
             panic("pipe")
         if fork1() == 0:
@@ -119,7 +110,7 @@ def runcmd(cmd):
         wait()
         
     elif cmd.type == BACK:
-        bcmd = backcmd(cmd)
+        bcmd = BackCmd(cmd)
         if fork1() == 0:
             runcmd(bcmd.cmd)
         
@@ -183,63 +174,6 @@ def fork1():
     if pid == -1:
         panic("fork")
     return pid
-
-
-# Constructors
-
-# struct cmd*
-# redircmd(struct cmd *subcmd, char *file, char *efile, int mode, int fd)
-# {
-#   struct redircmd *cmd;
-# 
-#   cmd = malloc(sizeof(*cmd));
-#   memset(cmd, 0, sizeof(*cmd));
-#   cmd->type = REDIR;
-#   cmd->cmd = subcmd;
-#   cmd->file = file;
-#   cmd->efile = efile;
-#   cmd->mode = mode;
-#   cmd->fd = fd;
-#   return (struct cmd*)cmd;
-# }
-# 
-# struct cmd*
-# pipecmd(struct cmd *left, struct cmd *right)
-# {
-#   struct pipecmd *cmd;
-# 
-#   cmd = malloc(sizeof(*cmd));
-#   memset(cmd, 0, sizeof(*cmd));
-#   cmd->type = PIPE;
-#   cmd->left = left;
-#   cmd->right = right;
-#   return (struct cmd*)cmd;
-# }
-# 
-# struct cmd*
-# listcmd(struct cmd *left, struct cmd *right)
-# {
-#   struct listcmd *cmd;
-# 
-#   cmd = malloc(sizeof(*cmd));
-#   memset(cmd, 0, sizeof(*cmd));
-#   cmd->type = LIST;
-#   cmd->left = left;
-#   cmd->right = right;
-#   return (struct cmd*)cmd;
-# }
-# 
-# struct cmd*
-# backcmd(struct cmd *subcmd)
-# {
-#   struct backcmd *cmd;
-# 
-#   cmd = malloc(sizeof(*cmd));
-#   memset(cmd, 0, sizeof(*cmd));
-#   cmd->type = BACK;
-#   cmd->cmd = subcmd;
-#   return (struct cmd*)cmd;
-# }
 
 
 # Parsing
@@ -314,12 +248,19 @@ def parseline(st, ps, es):
     cmd, ps = parsepipe(st, ps, es)
     
     # while peek(ps, es, "&"):
-    #     gettoken(ps, es, 0, 0);
-    #     cmd = backcmd(cmd);
-    # 
-    # if peek(ps, es, ";"):
-    #     gettoken(ps, es, 0, 0);
-    #     cmd = listcmd(cmd, parseline(ps, es));
+    while True:
+        dummy, ps = peek(st, ps, es, "&")
+        if not dummy: break
+        
+        tok, ps, q, eq = gettoken(st, ps, es)
+        
+        cmd = BackCmd(cmd)
+    
+    dummy, ps = peek(st, ps, es, ";")
+    if dummy:
+        tok, ps, q, eq = gettoken(st, ps, es)
+        cmd2, ps = parseline(st, ps, es)
+        cmd = ListCmd(cmd, cmd2)
     
     return cmd, ps
 
@@ -329,9 +270,11 @@ def parsepipe(st, ps, es):
     
     cmd, ps = parseexec(st, ps, es)
     
-    # if peek(ps, es, "|"):
-    #     gettoken(ps, es, 0, 0)
-    #     cmd = pipecmd(cmd, parsepipe(ps, es))
+    dummy, ps = peek(st, ps, es, "|")
+    if dummy:
+        tok, ps, q, eq = gettoken(st, ps, es)
+        cms2, ps = parsepipe(ps, es)
+        cmd = PipeCmd(cmd, cmd2)
     
     return cmd, ps
 
@@ -342,18 +285,18 @@ def parseredirs(cmd, st, ps, es):
         dummy, ps = peek(st, ps, es, "<>")
         if not dummy: break
         
-        assert False
-        # tok, ps, q, eq = gettoken(st, ps, es)
-        # 
-        # if tok != "a":
-        #     panic("missing file for redirection")
-        # 
-        # if tok == "<":
-        #     cmd = redircmd(cmd, st, q, eq, O_RDONLY, 0) # st[q:eq] rather than st, q, eq
-        # elif tok == ">":
-        #     cmd = redircmd(cmd, st, q, eq, O_WRONLY|O_CREATE, 1)
-        # elif tok == "+":
-        #     cmd = redircmd(cmd, st, q, eq, O_WRONLY|O_CREATE, 1)
+        tok, ps, q, eq = gettoken(st, ps, es)
+        
+        tok2, ps, q, eq = gettoken(st, ps, es)
+        if tok2 != "a":
+            panic("missing file for redirection")
+        
+        if tok == "<":
+            cmd = RedirCmd(cmd, st[q:eq], O_RDONLY, 0)
+        elif tok == ">":
+            cmd = RedirCmd(cmd, st[q:eq], O_WRONLY|O_CREATE, 1)
+        elif tok == "+":
+            cmd = RedirCmd(cmd, st[q:eq], O_WRONLY|O_CREATE, 1)
     
     return cmd, ps
 
@@ -377,8 +320,9 @@ def parseredirs(cmd, st, ps, es):
 
 def parseexec(st, ps, es):
     
-    # if(peek(ps, es, "("))
-    #     return parseblock(ps, es);
+    dummy, ps = peek(st, ps, es, "(")
+    if dummy:
+        return parseblock(ps, es);
     
     cmd = ExecCmd()
     

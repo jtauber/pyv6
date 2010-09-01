@@ -2,7 +2,7 @@
 # from printf import printf
 
 from mock import mock_open, mock_read, mock_write, mock_close, mock_fstat
-from mock import O_RDONLY, O_RDWR
+from mock import O_RDONLY, O_RDWR, O_WRONLY, O_CREATE
 from mock import T_FILE, T_DIR
 
 
