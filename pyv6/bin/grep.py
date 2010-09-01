@@ -2,6 +2,7 @@
 
 from user import open_, read, close, exit_, write
 from ulib import strchr
+from printf import printf
 
 
 def grep(pattern, fd):

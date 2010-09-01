@@ -2,7 +2,7 @@
 # from printf import printf
 
 from mock import mock_open, mock_read, mock_write, mock_close, mock_fstat
-from mock import O_RDONLY
+from mock import O_RDONLY, O_RDWR, O_WRONLY, O_CREATE
 from mock import T_FILE, T_DIR
 
 
@@ -12,7 +12,7 @@ class Exit(Exception):
 # system call stubs
 
 # int fork(void);
-def fork(): return 1
+def fork(): return 0
 
 # int exit(void) __attribute__((noreturn));
 def exit_(status=0): raise Exit()
@@ -38,6 +38,8 @@ def close(fd):
 def kill(n): pass
 
 # int exec(char*, char**);
+def exec_(argv0, argv):
+    pass
 
 # int open(char*, int);
 def open_(filename, mode):
@@ -58,7 +60,8 @@ def link(old, new): pass
 # int mkdir(char*);
 def mkdir(path): return 1 # @@@
 
-# int chdir(char*);
+# int chdir(char*)
+def chdir(path): pass
 
 # int dup(int);
 def dup(i): pass # @@@
