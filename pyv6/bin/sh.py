@@ -68,13 +68,14 @@ def runcmd(cmd):
         exit_()
     
     if cmd.type == EXEC:
-        if cmd.argv[0] == 0:
+        ecmd = cmd
+        if ecmd.argv[0] == 0:
             exit_()
-        exec_(cmd.argv[0], cmd.argv)
-        printf(2, "exec %s failed\n", cmd.argv[0])
+        exec_(ecmd.argv[0], ecmd.argv)
+        printf(2, "exec %s failed\n", ecmd.argv[0])
         
     elif cmd.type == REDIR:
-        rcmd = RedirCmd(cmd) # @@@
+        rcmd = cmd
         close(rcmd.fd)
         if open_(rcmd.file, rcmd.mode) < 0:
             printf(2, "open %s failed\n", rcmd.file);
@@ -82,14 +83,14 @@ def runcmd(cmd):
         runcmd(rcmd.cmd)
         
     elif cmd.type == LIST:
-        lcmd = ListCmd(cmd)
+        lcmd = cmd
         if fork1() == 0:
             runcmd(lcmd.left)
         wait()
         runcmd(lcmd.right)
         
     elif cmd.type == PIPE:
-        pcmd = PipeCmd(cmd)
+        pcmd = cmd
         if pipe(p) < 0:
             panic("pipe")
         if fork1() == 0:
@@ -110,7 +111,7 @@ def runcmd(cmd):
         wait()
         
     elif cmd.type == BACK:
-        bcmd = BackCmd(cmd)
+        bcmd = cmd
         if fork1() == 0:
             runcmd(bcmd.cmd)
         
