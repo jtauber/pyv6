@@ -1,6 +1,6 @@
 # Shell.
 
-from user import open_, read, fork, wait, chdir, exit_, exec_
+from user import open_, read, fork, wait, chdir, exit_, exec_, close
 from user import O_RDWR, O_WRONLY, O_CREATE
 from printf import printf
 from ulib import gets, strlen, strchr
