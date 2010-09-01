@@ -324,10 +324,11 @@ def parseexec(st, ps, es):
     if dummy:
         return parseblock(ps, es);
     
-    cmd = ExecCmd()
+    ret = ExecCmd()
+    cmd = ret
     
     argc = 0
-    cmd, ps = parseredirs(cmd, st, ps, es)
+    ret, ps = parseredirs(ret, st, ps, es)
     
     while True:
         dummy, ps = peek(st, ps, es, "|)&;")
@@ -349,7 +350,7 @@ def parseexec(st, ps, es):
     
     cmd.argv[argc] = ""
     
-    return cmd, ps
+    return ret, ps
 
 
 # // NUL-terminate all the counted strings.
