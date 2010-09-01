@@ -346,7 +346,7 @@ def parseexec(st, ps, es):
         if argc >= MAXARGS:
             panic("too many args")
         
-        cmd, ps = parseredirs(cmd, st, ps, es)
+        ret, ps = parseredirs(ret, st, ps, es)
     
     cmd.argv[argc] = ""
     
