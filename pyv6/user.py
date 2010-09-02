@@ -21,6 +21,7 @@ def exit_(status=0): raise Exit()
 def wait(): return -1 # @@@
 
 # int pipe(int*);
+def pipe(p): return -1 # @@@
 
 # int write(int, void*, int);
 def write(fd, buf, length):

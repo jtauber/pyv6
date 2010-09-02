@@ -1,6 +1,6 @@
 # Shell.
 
-from user import open_, read, fork, wait, chdir, exit_, exec_, close
+from user import open_, read, fork, wait, chdir, exit_, exec_, close, pipe
 from user import O_RDWR, O_WRONLY, O_CREATE
 from printf import printf
 from ulib import gets, strlen, strchr
@@ -165,7 +165,6 @@ def main(argv, argc):
 
 
 def panic(s):
-    raise Exception
     printf(2, "%s\n", s)
     exit_()
 
@@ -274,7 +273,7 @@ def parsepipe(st, ps, es):
     dummy, ps = peek(st, ps, es, "|")
     if dummy:
         tok, ps, q, eq = gettoken(st, ps, es)
-        cms2, ps = parsepipe(ps, es)
+        cmd2, ps = parsepipe(st, ps, es)
         cmd = PipeCmd(cmd, cmd2)
     
     return cmd, ps
