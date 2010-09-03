@@ -10,6 +10,10 @@ def putc(fd, c):
 def printint(fd, xx, base, sgn):
     digits = "0123456789ABCDEF"
     
+    # coerce char into int
+    if isinstance(xx, str):
+        xx = ord(xx)
+    
     buf = [None] * 16
     
     neg = False

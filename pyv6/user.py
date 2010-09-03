@@ -1,7 +1,7 @@
 # commented out due to circular import
 # from printf import printf
 
-from mock import mock_open, mock_read, mock_write, mock_close, mock_fstat
+from mock import mock_open, mock_read, mock_write, mock_close, mock_fstat, mock_unlink
 from mock import O_RDONLY, O_RDWR, O_WRONLY, O_CREATE
 from mock import T_FILE, T_DIR
 
@@ -49,7 +49,8 @@ def open_(filename, mode):
 # int mknod(char*, short, short);
 
 # int unlink(char*);
-def unlink(s): pass
+def unlink(path):
+    return mock_unlink(path) # @@@
 
 # int fstat(int fd, struct stat*);
 def fstat(fd):

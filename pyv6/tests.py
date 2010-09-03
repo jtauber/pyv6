@@ -2,8 +2,8 @@
 
 ## library tests
 
-from ulib import atoi
-print atoi("5")
+# from ulib import atoi
+# print atoi("5")
 
 # from bin.grep import match, matchhere
 # print match("ten", "contents")
@@ -27,24 +27,24 @@ def run(line):
     # if we get here we *should* have seen an Exit but didn't
     raise
 
-run("echo hello world")
-run("zombie")
-run("kill")
-run("kill 5")
-run("ln")
-run("ln /foo /bar")
-run("rm")
-run("rm /bar")
-run("mkdir")
-run("mkdir /baz")
-run("cat /foo")
-run("forktest")
-run("wc /foo")
-run("ls /foo")
-run("ls /biz")
-run("grep ten /foo")
-run("grep ^ten /foo")
-run("grep ^con /foo")
-run("sh")
+# run("echo hello world")
+# run("zombie")
+# run("kill")
+# run("kill 5")
+# run("ln")
+# run("ln /foo /bar")
+# run("rm")
+# run("rm /bar")
+# run("mkdir")
+# run("mkdir /baz")
+# run("cat /foo")
+# run("forktest")
+# run("wc /foo")
+# run("ls /foo")
+# run("ls /biz")
+# run("grep ten /foo")
+# run("grep ^ten /foo")
+# run("grep ^con /foo")
+# run("sh")
 
-# run("usertests")
+run("usertests")

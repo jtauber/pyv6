@@ -42,6 +42,7 @@ class MockFileSystem:
     
     def __init__(self):
         self.files = {}
+        self.files["echo"] = File("...")
         self.files["/foo"] = File("contents of foo!\n")
         self.files["/biz"] = Dir("123456alpha         987654beta          ")
         self.files["/biz/alpha"] = File("contents of alpha!\n")
@@ -50,7 +51,10 @@ class MockFileSystem:
     
     def open(self, path, mode):
         if path not in self.files:
-            return -1
+            if mode & O_CREATE:
+                self.files[path] = File("")
+            else:
+                return -1
         next_fd = len(self.fds) + 3
         self.fds[next_fd] = (path, mode, 0, self.files[path])
         return next_fd
@@ -80,7 +84,12 @@ class MockFileSystem:
         elif fd == 2:
             sys.stderr.write(buf[:length])
         else:
-            assert False
+            path, mode, end, f = self.fds[fd]
+            if mode & O_WRONLY or mode & O_RDWR:
+                f.contents += buf[:length] # @@@
+                return length # @@@
+            else:
+                assert False
     
     def close(self, fd):
         del self.fds[fd]
@@ -95,7 +104,15 @@ class MockFileSystem:
         s.nlink = f.nlink   # Number of links to file
         s.size = f.size     # Size of file in bytes
         return 0, s
-        
+    
+    def unlink(self, path):
+        try:
+            del self.files[path]
+            return 0
+        except KeyError:
+            return -1
+
+
 MockFS = MockFileSystem()
 
 def mock_open(path, mode):
@@ -112,3 +129,6 @@ def mock_close(fd):
 
 def mock_fstat(fd):
     return MockFS.fstat(fd)
+
+def mock_unlink(path):
+    return MockFS.unlink(path)
