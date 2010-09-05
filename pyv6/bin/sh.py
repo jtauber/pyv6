@@ -158,7 +158,7 @@ def main(argv, argc):
             continue
         
         fork1(runcmd, parsecmd(buf))
-        wait()
+        # wait()
     
     exit_()
 

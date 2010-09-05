@@ -14,7 +14,7 @@
 # 
 ## user-space bin tests
 
-from mock import MockFS, ModuleFile, go
+from mock import MockFS, ModuleFile, mock_fork
 MockFS.files["cat"] = ModuleFile("bin.cat")
 MockFS.files["echo"] = ModuleFile("bin.echo")
 MockFS.files["grep"] = ModuleFile("bin.grep")
@@ -25,7 +25,7 @@ def run(line):
     l_split = line.split()
     cmd = l_split[0]
     main = __import__("bin." + cmd, fromlist=["main"]).main
-    go(main, len(l_split), l_split)
+    mock_fork(main, len(l_split), l_split)
 
 # run("echo hello world")
 # run("zombie")
@@ -47,4 +47,4 @@ def run(line):
 # run("grep ^con /foo")
 run("sh")
 
-# run("usertests")
+run("usertests")

@@ -194,8 +194,6 @@ def schedule():
     global _scheduled
     global _current
     
-    # print "schedule", _current
-    
     if _current and not _current.blocked:
         _scheduled.append(_current)
     
@@ -295,9 +293,3 @@ def mock_fork(func, *argv):
 def mock_wait():
     global _current
     _current.wait()
-
-
-def go(func, *argv):
-    argv = (func,) + argv
-    tasklet(mock_fork)(*argv)
-    schedule()
