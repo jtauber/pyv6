@@ -1,5 +1,11 @@
 from printf import printf
-from user import open_, close, O_CREATE, exit_, O_RDWR, write, O_RDONLY, read, unlink
+from user import open_, close, O_CREATE, exit_, O_RDWR, write, O_RDONLY, read, unlink, exec_
+
+
+from mock import MockFS, ModuleFile
+MockFS.files["echo"] = ModuleFile("bin.echo")
+
+
 
 #include "types.h"
 #include "stat.h"
@@ -15,6 +21,7 @@ MAXFILE = 1024 # @@@
 
 # char name[3];
 # char *echoargv[] = { "echo", "ALL", "TESTS", "PASSED", 0 };
+echoargv = ["echo", "ALL", "TESTS", "PASSED"]
 
 stdout = 1
 
@@ -176,17 +183,15 @@ def createtest():
 #   }
 #   printf(stdout, "mkdir test\n");
 # }
-# 
-# void
-# exectest(void)
-# {
-#   printf(stdout, "exec test\n");
-#   if(exec("echo", echoargv) < 0) {
-#     printf(stdout, "exec echo failed\n");
-#     exit();
-#   }
-# }
-# 
+
+
+def exectest():
+    printf(stdout, "exec test\n")
+    if exec_("echo", echoargv) < 0:
+        printf(stdout, "exec echo failed\n")
+        exit_()
+
+
 # // simple fork and pipe read/write
 # 
 # void
@@ -1253,7 +1258,7 @@ def main(argc, argv):
     # iref()
     # forktest()
     # bigdir()
-    # 
-    # exectest()
+    
+    exectest()
     
     exit_()

@@ -1,7 +1,7 @@
 # commented out due to circular import
 # from printf import printf
 
-from mock import mock_open, mock_read, mock_write, mock_close, mock_fstat, mock_unlink
+from mock import mock_open, mock_read, mock_write, mock_close, mock_fstat, mock_unlink, mock_exec
 from mock import O_RDONLY, O_RDWR, O_WRONLY, O_CREATE
 from mock import T_FILE, T_DIR
 
@@ -39,8 +39,8 @@ def close(fd):
 def kill(n): pass
 
 # int exec(char*, char**);
-def exec_(argv0, argv):
-    pass
+def exec_(path, argv):
+    return mock_exec(path, argv)
 
 # int open(char*, int);
 def open_(filename, mode):

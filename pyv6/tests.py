@@ -16,6 +16,9 @@
 
 from user import Exit
 
+from mock import MockFS, ModuleFile
+MockFS.files["echo"] = ModuleFile("bin.echo")
+
 def run(line):
     l_split = line.split()
     cmd = l_split[0]
@@ -45,6 +48,6 @@ def run(line):
 # run("grep ten /foo")
 # run("grep ^ten /foo")
 # run("grep ^con /foo")
-# run("sh")
+run("sh")
 
-run("usertests")
+# run("usertests")

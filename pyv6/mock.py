@@ -8,8 +8,12 @@ T_FILE = 2   # File
 T_DEV  = 3   # Special device
 
 
-
 import sys
+import pickle
+
+
+class Exit(Exception):
+    pass
 
 
 class File(object):
@@ -24,6 +28,12 @@ class File(object):
     def size(self):
         return len(self.contents)
 
+
+class ModuleFile(File):
+    def __init__(self, module_name):
+        main = __import__(module_name, fromlist=["main"]).main
+        contents = pickle.dumps(main)
+        super(ModuleFile, self).__init__(contents)
 
 class Dir(object):
     def __init__(self, contents):
@@ -42,7 +52,6 @@ class MockFileSystem:
     
     def __init__(self):
         self.files = {}
-        self.files["echo"] = File("...")
         self.files["/foo"] = File("contents of foo!\n")
         self.files["/biz"] = Dir("123456alpha         987654beta          ")
         self.files["/biz/alpha"] = File("contents of alpha!\n")
@@ -132,3 +141,16 @@ def mock_fstat(fd):
 
 def mock_unlink(path):
     return MockFS.unlink(path)
+
+def mock_exec(path, argv):
+    try:
+        fd = mock_open(path, O_RDONLY)
+        dummy, contents = mock_read(fd, 1000000)
+        mock_close(fd)
+        main = pickle.loads(contents)
+        main(len(argv), argv)
+    except Exit:
+        return 0
+    
+    # if we get here we *should* have seen an Exit but didn't
+    return -1
