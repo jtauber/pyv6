@@ -62,7 +62,7 @@ def printf(fd, fmt, *ap):
             elif c == "s":
                 s = ap[0]
                 ap = ap[1:]
-                if s == "":
+                if s == "" or s == "\0" or s is None:
                     s = "(null)"
                 while s != "":
                     putc(fd, s[0])
