@@ -84,8 +84,11 @@ def runcmd(cmd):
         
     elif cmd.type == LIST:
         lcmd = cmd
-        if fork1() == 0:
-            runcmd(lcmd.left)
+        # if fork1() == 0:
+        #     runcmd(lcmd.left)
+        # wait()
+        # runcmd(lcmd.right)
+        fork1(runcmd, lcmd.left)
         wait()
         runcmd(lcmd.right)
         
