@@ -12,10 +12,6 @@ import sys
 import pickle
 
 
-class Exit(Exception):
-    pass
-
-
 class File(object):
     def __init__(self, contents):
         self.contents = contents
@@ -143,14 +139,165 @@ def mock_unlink(path):
     return MockFS.unlink(path)
 
 def mock_exec(path, argv):
-    try:
-        fd = mock_open(path, O_RDONLY)
+    fd = mock_open(path, O_RDONLY)
+    if fd == -1:
+        pass # error
+    else:
         dummy, contents = mock_read(fd, 1000000)
         mock_close(fd)
         main = pickle.loads(contents)
-        main(len(argv), argv)
-    except Exit:
-        return 0
+        for argc in range(len(argv)):
+            if not argv[argc]:
+                break
+        else:
+            argc = len(argv)
+        main(argc, argv)
+
+## proc/schedule/fork stuff
+
+# based on:
+# http://github.com/iamFIREcracker/_stackless/blob/master/_stackless.py
+# http://aigamedev.com/open/articles/round-robin-multi-tasking/
+
+from collections import deque
+
+import greenlet
+
+
+# Schedule queue: optimized for front/side operations.
+_scheduled = deque()
+
+# Reference to the current active tasklet.
+_current = None
+
+
+def switch(next):
+    """
+    switch the control to the given tasklet
+    """
     
-    # if we get here we *should* have seen an Exit but didn't
-    return -1
+    global _current
+    
+    _current = next
+    if next.firstrun:
+        next.firstrun = False
+        next.greenlet.switch(*next.args, **next.kwargs)
+    else:
+        next.greenlet.switch()
+
+
+def schedule():
+    """
+    schedule a new tasklet
+    """
+    
+    global _scheduled
+    global _current
+    
+    # print "schedule", _current
+    
+    if _current and not _current.blocked:
+        _scheduled.append(_current)
+    
+    while True:
+        next = _scheduled.popleft()
+        # print "next", next
+        if not next.alive:
+            continue
+        
+        switch(next)
+        break
+
+
+def getruncount():
+    """
+    get the number of queued tasklets
+    """
+    
+    global _scheduled
+    
+    return len(_scheduled)
+
+
+def run():
+    """
+    schedule tasklets until there are active ones
+    """
+    while getruncount() > 0:
+        schedule()
+
+
+class tasklet(object):
+    """
+    wrapper of greenlet object
+    """
+    
+    def __init__(self, func):
+        """
+        create tasklet for given function
+        """
+        
+        global _current
+        global _scheduled
+        
+        if _current:
+            self.parent = _current
+        else:
+            self.parent = None
+        
+        self.greenlet = greenlet.greenlet(func)
+        self.firstrun = True
+        self.alive = True
+        self.blocked = False
+        self.args = ()
+        self.kwargs = {}
+        self.func_name = func.__name__
+        
+        self.children = []
+        if _current:
+            _current.children.append(self)
+        
+        _scheduled.appendleft(self)
+        
+    def __call__(self, *args, **kwargs):
+        """
+        load arguments for tasklet initialization
+        """
+        
+        self.args = args
+        self.kwargs = kwargs
+    
+    def child_count(self):
+        return len([child for child in self.children if child.alive])
+    
+    def wait(self):
+        """
+        wait until a child tasklet dies
+        """
+        initial_count = self.child_count()
+        while self.child_count() == initial_count:
+            schedule()
+
+
+def mock_exit():
+    global _current
+    global _scheduled
+    _current.alive = False
+    # print [(x, x.func_name, x.alive) for x in _scheduled]
+    schedule()
+
+
+def mock_fork(func, *argv):
+    tasklet(func)(*argv)
+    schedule()
+
+
+def mock_wait():
+    global _current
+    _current.wait()
+
+
+def go(func, *argv):
+    argv = (func,) + argv
+    tasklet(mock_fork)(*argv)
+    schedule()

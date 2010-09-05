@@ -14,21 +14,18 @@
 # 
 ## user-space bin tests
 
-from user import Exit
-
-from mock import MockFS, ModuleFile
+from mock import MockFS, ModuleFile, go
+MockFS.files["cat"] = ModuleFile("bin.cat")
 MockFS.files["echo"] = ModuleFile("bin.echo")
+MockFS.files["grep"] = ModuleFile("bin.grep")
+MockFS.files["ls"] = ModuleFile("bin.ls")
+MockFS.files["wc"] = ModuleFile("bin.wc")
 
 def run(line):
     l_split = line.split()
     cmd = l_split[0]
     main = __import__("bin." + cmd, fromlist=["main"]).main
-    try:
-        main(len(l_split), l_split)
-    except Exit:
-        return
-    # if we get here we *should* have seen an Exit but didn't
-    raise
+    go(main, len(l_split), l_split)
 
 # run("echo hello world")
 # run("zombie")
@@ -48,6 +45,6 @@ def run(line):
 # run("grep ten /foo")
 # run("grep ^ten /foo")
 # run("grep ^con /foo")
-run("sh")
+# run("sh")
 
-# run("usertests")
+run("usertests")

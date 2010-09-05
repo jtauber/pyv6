@@ -1,24 +1,24 @@
 # commented out due to circular import
 # from printf import printf
 
-from mock import mock_open, mock_read, mock_write, mock_close, mock_fstat, mock_unlink, mock_exec
+from mock import mock_open, mock_read, mock_write, mock_close, mock_fstat, mock_unlink, mock_exec, mock_exit, mock_fork, mock_wait
 from mock import O_RDONLY, O_RDWR, O_WRONLY, O_CREATE
 from mock import T_FILE, T_DIR
 
 
-class Exit(Exception):
-    pass
-
 # system call stubs
 
 # int fork(void);
-def fork(): return 0
+def fork(func, *argv):
+    return mock_fork(func, *argv)
 
 # int exit(void) __attribute__((noreturn));
-def exit_(status=0): raise Exit()
+def exit_(status=0):
+    return mock_exit()
 
 # int wait(void);
-def wait(): return -1 # @@@
+def wait():
+    return mock_wait()
 
 # int pipe(int*);
 def pipe(p): return -1 # @@@
