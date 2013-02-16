@@ -1,11 +1,11 @@
-O_RDONLY  = 0x000
-O_WRONLY  = 0x001
-O_RDWR    = 0x002
-O_CREATE  = 0x200
+O_RDONLY = 0x000
+O_WRONLY = 0x001
+O_RDWR = 0x002
+O_CREATE = 0x200
 
-T_DIR  = 1   # Directory
-T_FILE = 2   # File
-T_DEV  = 3   # Special device
+T_DIR = 1   # Directory
+T_FILE = 2  # File
+T_DEV = 3   # Special device
 
 
 import sys
@@ -30,6 +30,7 @@ class ModuleFile(File):
         main = __import__(module_name, fromlist=["main"]).main
         contents = pickle.dumps(main)
         super(ModuleFile, self).__init__(contents)
+
 
 class Dir(object):
     def __init__(self, contents):
@@ -75,7 +76,7 @@ class MockFileSystem:
         else:
             path, mode, ptr, f = self.fds[fd]
             if ptr >= len(f.contents):
-                return 0, "" # EOF
+                return 0, ""  # EOF
             end = min(len(f.contents), ptr + max_size)
             buf = f.contents[ptr:end]
             self.fds[fd] = (path, mode, end, f)
@@ -91,8 +92,8 @@ class MockFileSystem:
         else:
             path, mode, end, f = self.fds[fd]
             if mode & O_WRONLY or mode & O_RDWR:
-                f.contents += buf[:length] # @@@
-                return length # @@@
+                f.contents += buf[:length]  # @@@
+                return length  # @@@
             else:
                 assert False
     
@@ -100,7 +101,8 @@ class MockFileSystem:
         del self.fds[fd]
     
     def fstat(self, fd):
-        class Stat: pass
+        class Stat:
+            pass
         path, mode, ptr, f = self.fds[fd]
         s = Stat()
         s.type = f.type     # Type of file
@@ -120,28 +122,35 @@ class MockFileSystem:
 
 MockFS = MockFileSystem()
 
+
 def mock_open(path, mode):
     return MockFS.open(path, mode)
+
 
 def mock_read(fd, max_size):
     return MockFS.read(fd, max_size)
 
+
 def mock_write(fd, buf, length):
     return MockFS.write(fd, buf, length)
+
 
 def mock_close(fd):
     return MockFS.close(fd)
 
+
 def mock_fstat(fd):
     return MockFS.fstat(fd)
+
 
 def mock_unlink(path):
     return MockFS.unlink(path)
 
+
 def mock_exec(path, argv):
     fd = mock_open(path, O_RDONLY)
     if fd == -1:
-        pass # error
+        pass  # error
     else:
         dummy, contents = mock_read(fd, 1000000)
         mock_close(fd)

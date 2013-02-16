@@ -5,18 +5,18 @@ from user import open_, O_RDONLY, fstat, close, read
 # #include "fcntl.h"
 # #include "user.h"
 # #include "x86.h"
-# 
+#
 # char*
 # strcpy(char *s, char *t)
 # {
 #   char *os;
-# 
+#
 #   os = s;
 #   while((*s++ = *t++) != 0)
 #     ;
 #   return os;
 # }
-# 
+#
 # int
 # strcmp(const char *p, const char *q)
 # {
@@ -24,10 +24,11 @@ from user import open_, O_RDONLY, fstat, close, read
 #     p++, q++;
 #   return (uchar)*p - (uchar)*q;
 # }
-# 
+#
+
 
 def strlen(s):
-    s += "\0" # @@@
+    s += "\0"  # @@@
     n = 0
     while s[n] != "\0":
         n += 1
@@ -42,7 +43,7 @@ def strlen(s):
 #   stosb(dst, c, n);
 #   return dst;
 # }
-# 
+#
 
 def strchr(s, c):
     while s:
@@ -76,7 +77,7 @@ def stat(name):
 
 
 def atoi(s):
-    s += "\0" # @@@
+    s += "\0"  # @@@
     n = 0
     while "0" <= s[0] <= "9":
         n = n * 10 + ord(s[0]) - ord("0")
@@ -84,12 +85,12 @@ def atoi(s):
     return n
 
 
-# 
+#
 # void*
 # memmove(void *vdst, void *vsrc, int n)
 # {
 #   char *dst, *src;
-#   
+#
 #   dst = vdst;
 #   src = vsrc;
 #   while(n-- > 0)

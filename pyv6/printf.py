@@ -29,7 +29,8 @@ def printint(fd, xx, base, sgn):
         buf[i] = digits[x % base]
         i += 1
         x = x / base
-        if x == 0: break
+        if x == 0:
+            break
     
     if neg:
         buf[i] = "-"
@@ -37,7 +38,8 @@ def printint(fd, xx, base, sgn):
     
     while True:
         i -= 1
-        if i < 0: break
+        if i < 0:
+            break
         putc(fd, buf[i])
 
 
@@ -76,4 +78,4 @@ def printf(fd, fmt, *ap):
                 # Unknown % sequence.  Print it to draw attention.
                 putc(fd, "%")
                 putc(fd, c)
-            state = 0;
+            state = 0
