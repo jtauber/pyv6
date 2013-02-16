@@ -207,12 +207,13 @@ def schedule():
         _scheduled.append(_current)
     
     while True:
-        next = _scheduled.popleft()
-        # print "next", next
-        if not next.alive:
-            continue
-        
-        switch(next)
+        if _scheduled:
+            next = _scheduled.popleft()
+            # print "next", next
+            if not next.alive:
+                continue
+            
+            switch(next)
         break
 
 
