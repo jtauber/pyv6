@@ -28,7 +28,7 @@ def run(line):
     main = __import__("bin." + cmd, fromlist=["main"]).main
     mock_fork(main, len(l_split), l_split)
 
-# run("echo hello world")
+run("echo hello world")
 # run("zombie")
 # run("kill")
 # run("kill 5")
@@ -48,4 +48,4 @@ def run(line):
 # run("grep ^con /foo")
 # run("sh")
 
-run("usertests")
+# run("usertests")
