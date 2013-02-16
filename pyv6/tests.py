@@ -9,9 +9,9 @@
 # print match("ten", "contents")
 # print match("^ten", "contents")
 # print match("^con", "contents")
-# 
+#
 # exit()
-# 
+#
 ## user-space bin tests
 
 from mock import MockFS, ModuleFile, mock_fork
@@ -20,6 +20,7 @@ MockFS.files["echo"] = ModuleFile("bin.echo")
 MockFS.files["grep"] = ModuleFile("bin.grep")
 MockFS.files["ls"] = ModuleFile("bin.ls")
 MockFS.files["wc"] = ModuleFile("bin.wc")
+
 
 def run(line):
     l_split = line.split()
@@ -45,6 +46,6 @@ def run(line):
 # run("grep ten /foo")
 # run("grep ^ten /foo")
 # run("grep ^con /foo")
-run("sh")
+# run("sh")
 
 run("usertests")
