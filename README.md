@@ -21,5 +21,5 @@ See `pyv6/tests.py` for the smoke tests for what I've done so far.
 See also `translating.txt` for some notes on translating C idioms to Python.
 
 
-James Tauber 
+James Tauber  
 jtauber@jtauber.com
