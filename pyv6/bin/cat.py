@@ -7,11 +7,12 @@ def cat(fd):
     # while((n = read(fd, buf, sizeof(buf))) > 0)
     while True:
         n, buf = read(fd, 512)
-        if n <= 0: break
+        if n <= 0:
+            break
         write(1, buf, n)
     
     if n < 0:
-        printf(1, "cat: read error\n") # @@@ should that be 2?
+        printf(1, "cat: read error\n")  # @@@ should that be 2?
     
     exit_(1)
 
@@ -25,7 +26,7 @@ def main(argc, argv):
     for i in range(1, argc):
         fd = open_(argv[i], 0)
         if fd < 0:
-            printf(1, "cat: cannot open %s\n", argv[i]) # @@@ should that be 2?
+            printf(1, "cat: cannot open %s\n", argv[i])  # @@@ should that be 2?
             exit_()
         cat(fd)
         close(fd)

@@ -1,7 +1,7 @@
 # init: The initial user-level program
 
 from user import open_, dup, fork, wait
-from mock import O_RDWR # @@@
+from mock import O_RDWR  # @@@
 from printf import printf
 
 
@@ -14,8 +14,8 @@ def main():
         mknod("console", 1, 1)
         open_("console", O_RDWR)
     
-    dup(0) # stdout
-    dup(0) # stderr
+    dup(0)  # stdout
+    dup(0)  # stderr
     
     while True:
         printf(1, "init: starting sh\n")

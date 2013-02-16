@@ -5,9 +5,9 @@ from printf import printf
 
 def main(argc, argv):
     
-    if argc < 2: # @@@ C source has < 1
+    if argc < 2:  # @@@ C source has < 1
         printf(2, "usage: kill pid...\n")
-        exit_();
+        exit_()
     
     for i in range(1, argc):
         kill(atoi(argv[i]))

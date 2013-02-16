@@ -1,6 +1,6 @@
 # Shell.
 
-from user import open_, read, fork, wait, chdir, exit_, exec_, close, pipe
+from user import open_, fork, wait, chdir, exit_, exec_, close, pipe
 from user import O_RDWR, O_WRONLY, O_CREATE
 from printf import printf
 from ulib import gets, strlen, strchr
@@ -78,7 +78,7 @@ def runcmd(cmd):
         rcmd = cmd
         close(rcmd.fd)
         if open_(rcmd.file, rcmd.mode) < 0:
-            printf(2, "open %s failed\n", rcmd.file);
+            printf(2, "open %s failed\n", rcmd.file)
             exit_()
         runcmd(rcmd.cmd)
         
@@ -127,7 +127,7 @@ def runcmd(cmd):
 def getcmd(nbuf):
     printf(2, "$ ")
     n, buf = gets(nbuf)
-    if buf[0] == 0: # EOF
+    if buf[0] == 0:  # EOF
         return -1, buf
     return 0, buf
 
@@ -140,7 +140,8 @@ def main(argv, argc):
     # while((fd = open("console", O_RDWR)) >= 0){
     while True:
         fd = open_("console", O_RDWR)
-        if fd < 0: break
+        if fd < 0:
+            break
         
         if fd >= 3:
             close(fd)
@@ -150,12 +151,13 @@ def main(argv, argc):
     # while(getcmd(buf, sizeof(buf)) >= 0){
     while True:
         n, buf = getcmd(100)
-        if n < 0: break
+        if n < 0:
+            break
         
         if buf[0] == "c" and buf[1] == "d" and buf[2] == " ":
             # Clumsy but will have to do for now.
             # Chdir has no effect on the parent if run in the child.
-            buf = buf[:strlen(buf) - 1] # chop \n
+            buf = buf[:strlen(buf) - 1]  # chop \n
             if chdir(buf[3:]) < 0:
                 printf(2, "cannot cd %s\n", buf[3:])
             continue
@@ -195,7 +197,7 @@ def gettoken(st, ps, es):
     
     ret = st[s]
     
-    if st[s] == "\0": # @@@ can this happen?
+    if st[s] == "\0":  # @@@ can this happen?
         pass
     elif st[s] in "|();&<":
         s += 1
@@ -252,7 +254,8 @@ def parseline(st, ps, es):
     # while peek(ps, es, "&"):
     while True:
         dummy, ps = peek(st, ps, es, "&")
-        if not dummy: break
+        if not dummy:
+            break
         
         tok, ps, q, eq = gettoken(st, ps, es)
         
@@ -265,7 +268,6 @@ def parseline(st, ps, es):
         cmd = ListCmd(cmd, cmd2)
     
     return cmd, ps
-
 
 
 def parsepipe(st, ps, es):
@@ -285,7 +287,8 @@ def parseredirs(cmd, st, ps, es):
     
     while True:
         dummy, ps = peek(st, ps, es, "<>")
-        if not dummy: break
+        if not dummy:
+            break
         
         tok, ps, q, eq = gettoken(st, ps, es)
         
@@ -296,9 +299,9 @@ def parseredirs(cmd, st, ps, es):
         if tok == "<":
             cmd = RedirCmd(cmd, st[q:eq], O_RDONLY, 0)
         elif tok == ">":
-            cmd = RedirCmd(cmd, st[q:eq], O_WRONLY|O_CREATE, 1)
+            cmd = RedirCmd(cmd, st[q:eq], O_WRONLY | O_CREATE, 1)
         elif tok == "+":
-            cmd = RedirCmd(cmd, st[q:eq], O_WRONLY|O_CREATE, 1)
+            cmd = RedirCmd(cmd, st[q:eq], O_WRONLY | O_CREATE, 1)
     
     return cmd, ps
 
@@ -307,7 +310,7 @@ def parseredirs(cmd, st, ps, es):
 # parseblock(char **ps, char *es)
 # {
 #   struct cmd *cmd;
-# 
+#
 #   if(!peek(ps, es, "("))
 #     panic("parseblock");
 #   gettoken(ps, es, 0, 0);
@@ -324,7 +327,7 @@ def parseexec(st, ps, es):
     
     dummy, ps = peek(st, ps, es, "(")
     if dummy:
-        return parseblock(ps, es);
+        return parseblock(ps, es)
     
     ret = ExecCmd()
     cmd = ret
@@ -334,7 +337,8 @@ def parseexec(st, ps, es):
     
     while True:
         dummy, ps = peek(st, ps, es, "|)&;")
-        if dummy: break
+        if dummy:
+            break
         
         tok, ps, q, eq = gettoken(st, ps, es)
         
@@ -365,35 +369,35 @@ def parseexec(st, ps, es):
 #   struct listcmd *lcmd;
 #   struct pipecmd *pcmd;
 #   struct redircmd *rcmd;
-# 
+#
 #   if(cmd == 0)
 #     return 0;
-#   
+#
 #   switch(cmd->type){
 #   case EXEC:
 #     ecmd = (struct execcmd*)cmd;
 #     for(i=0; ecmd->argv[i]; i++)
 #       *ecmd->eargv[i] = 0;
 #     break;
-# 
+#
 #   case REDIR:
 #     rcmd = (struct redircmd*)cmd;
 #     nulterminate(rcmd->cmd);
 #     *rcmd->efile = 0;
 #     break;
-# 
+#
 #   case PIPE:
 #     pcmd = (struct pipecmd*)cmd;
 #     nulterminate(pcmd->left);
 #     nulterminate(pcmd->right);
 #     break;
-#     
+#
 #   case LIST:
 #     lcmd = (struct listcmd*)cmd;
 #     nulterminate(lcmd->left);
 #     nulterminate(lcmd->right);
 #     break;
-# 
+#
 #   case BACK:
 #     bcmd = (struct backcmd*)cmd;
 #     nulterminate(bcmd->cmd);

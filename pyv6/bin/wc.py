@@ -40,7 +40,7 @@ def main(argc, argv):
     for i in range(1, argc):
         fd = open_(argv[i], 0)
         if fd < 0:
-            printf(1, "wc: cannot open %s\n", argv[i]) # @@@ xv6 had 'cat' for 'wc'
+            printf(1, "wc: cannot open %s\n", argv[i])  # @@@ xv6 had 'cat' for 'wc'
             exit_()
         wc(fd, argv[i])
         close(fd)

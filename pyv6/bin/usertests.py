@@ -6,13 +6,12 @@ from mock import MockFS, ModuleFile
 MockFS.files["echo"] = ModuleFile("bin.echo")
 
 
-
 #include "types.h"
 #include "stat.h"
 #include "user.h"
 
 #include "fs.h"
-MAXFILE = 1024 # @@@
+MAXFILE = 1024  # @@@
 
 
 #include "fcntl.h"
@@ -26,6 +25,7 @@ echoargv = ["echo", "ALL", "TESTS", "PASSED"]
 stdout = 1
 
 # simple file system tests
+
 
 def opentest():
     printf(stdout, "open test\n")
@@ -44,7 +44,7 @@ def opentest():
 def writetest():
     
     printf(stdout, "small file test\n")
-    fd = open_("small", O_CREATE|O_RDWR)
+    fd = open_("small", O_CREATE | O_RDWR)
     if fd >= 0:
         printf(stdout, "creat small succeeded; ok\n")
     else:
@@ -89,7 +89,7 @@ def writetest1():
     
     printf(stdout, "big files test\n")
     
-    fd = open_("big", O_CREATE|O_RDWR)
+    fd = open_("big", O_CREATE | O_RDWR)
     
     if fd < 0:
         printf(stdout, "error: creat big failed!\n")
@@ -145,7 +145,7 @@ def createtest():
     
     for i in range(52):
         name[1] = chr(ord("0") + i)
-        fd = open_("".join(name), O_CREATE|O_RDWR)
+        fd = open_("".join(name), O_CREATE | O_RDWR)
         close(fd)
     
     name[0] = "a"
@@ -161,22 +161,22 @@ def createtest():
 # void dirtest(void)
 # {
 #   printf(stdout, "mkdir test\n");
-# 
+#
 #   if(mkdir("dir0") < 0) {
 #     printf(stdout, "mkdir failed\n");
 #     exit();
 #   }
-# 
+#
 #   if(chdir("dir0") < 0) {
 #     printf(stdout, "chdir dir0 failed\n");
 #     exit();
 #   }
-# 
+#
 #   if(chdir("..") < 0) {
 #     printf(stdout, "chdir .. failed\n");
 #     exit();
 #   }
-# 
+#
 #   if(unlink("dir0") < 0) {
 #     printf(stdout, "unlink dir0 failed\n");
 #     exit();
@@ -193,13 +193,13 @@ def exectest():
 
 
 # // simple fork and pipe read/write
-# 
+#
 # void
 # pipe1(void)
 # {
 #   int fds[2], pid;
 #   int seq, i, n, cc, total;
-# 
+#
 #   if(pipe(fds) != 0){
 #     printf(1, "pipe() failed\n");
 #     exit();
@@ -243,25 +243,25 @@ def exectest():
 #   }
 #   printf(1, "pipe1 ok\n");
 # }
-# 
+#
 # // meant to be run w/ at most two CPUs
 # void
 # preempt(void)
 # {
 #   int pid1, pid2, pid3;
 #   int pfds[2];
-# 
+#
 #   printf(1, "preempt: ");
 #   pid1 = fork();
 #   if(pid1 == 0)
 #     for(;;)
 #       ;
-# 
+#
 #   pid2 = fork();
 #   if(pid2 == 0)
 #     for(;;)
 #       ;
-# 
+#
 #   pipe(pfds);
 #   pid3 = fork();
 #   if(pid3 == 0){
@@ -272,7 +272,7 @@ def exectest():
 #     for(;;)
 #       ;
 #   }
-# 
+#
 #   close(pfds[1]);
 #   if(read(pfds[0], buf, sizeof(buf)) != 1){
 #     printf(1, "preempt read error");
@@ -289,13 +289,13 @@ def exectest():
 #   wait();
 #   printf(1, "preempt ok\n");
 # }
-# 
+#
 # // try to find any races between exit and wait
 # void
 # exitwait(void)
 # {
 #   int i, pid;
-# 
+#
 #   for(i = 0; i < 100; i++){
 #     pid = fork();
 #     if(pid < 0){
@@ -313,13 +313,13 @@ def exectest():
 #   }
 #   printf(1, "exitwait ok\n");
 # }
-# 
+#
 # void
 # mem(void)
 # {
 #   void *m1, *m2;
 #   int pid;
-# 
+#
 #   if((pid = fork()) == 0){
 #     m1 = 0;
 #     while((m2 = malloc(10001)) != 0) {
@@ -343,9 +343,9 @@ def exectest():
 #     wait();
 #   }
 # }
-# 
+#
 # // More file system tests
-# 
+#
 # // two processes write to the same file descriptor
 # // is the offset shared? does inode locking work?
 # void
@@ -353,7 +353,7 @@ def exectest():
 # {
 #   int fd, pid, i, n, nc, np;
 #   char buf[10];
-# 
+#
 #   unlink("sharedfd");
 #   fd = open("sharedfd", O_CREATE|O_RDWR);
 #   if(fd < 0){
@@ -394,7 +394,7 @@ def exectest():
 #   else
 #     printf(1, "sharedfd oops %d %d\n", nc, np);
 # }
-# 
+#
 # // two processes write two different files at the same
 # // time, to test block allocation.
 # void
@@ -402,25 +402,25 @@ def exectest():
 # {
 #   int fd, pid, i, j, n, total;
 #   char *fname;
-# 
+#
 #   printf(1, "twofiles test\n");
-# 
+#
 #   unlink("f1");
 #   unlink("f2");
-# 
+#
 #   pid = fork();
 #   if(pid < 0){
 #     printf(1, "fork failed\n");
 #     return;
 #   }
-# 
+#
 #   fname = pid ? "f1" : "f2";
 #   fd = open(fname, O_CREATE | O_RDWR);
 #   if(fd < 0){
 #     printf(1, "create failed\n");
 #     exit();
 #   }
-# 
+#
 #   memset(buf, pid?'p':'c', 512);
 #   for(i = 0; i < 12; i++){
 #     if((n = write(fd, buf, 500)) != 500){
@@ -433,7 +433,7 @@ def exectest():
 #     wait();
 #   else
 #     exit();
-# 
+#
 #   for(i = 0; i < 2; i++){
 #     fd = open(i?"f1":"f2", 0);
 #     total = 0;
@@ -452,13 +452,13 @@ def exectest():
 #       exit();
 #     }
 #   }
-# 
+#
 #   unlink("f1");
 #   unlink("f2");
-# 
+#
 #   printf(1, "twofiles ok\n");
 # }
-# 
+#
 # // two processes create and delete different files in same directory
 # void
 # createdelete(void)
@@ -466,14 +466,14 @@ def exectest():
 #   enum { N = 20 };
 #   int pid, i, fd;
 #   char name[32];
-# 
+#
 #   printf(1, "createdelete test\n");
 #   pid = fork();
 #   if(pid < 0){
 #     printf(1, "fork failed\n");
 #     exit();
 #   }
-# 
+#
 #   name[0] = pid ? 'p' : 'c';
 #   name[2] = '\0';
 #   for(i = 0; i < N; i++){
@@ -492,12 +492,12 @@ def exectest():
 #       }
 #     }
 #   }
-# 
+#
 #   if(pid==0)
 #     exit();
 #   else
 #     wait();
-# 
+#
 #   for(i = 0; i < N; i++){
 #     name[0] = 'p';
 #     name[1] = '0' + i;
@@ -511,7 +511,7 @@ def exectest():
 #     }
 #     if(fd >= 0)
 #       close(fd);
-# 
+#
 #     name[0] = 'c';
 #     name[1] = '0' + i;
 #     fd = open(name, 0);
@@ -525,7 +525,7 @@ def exectest():
 #     if(fd >= 0)
 #       close(fd);
 #   }
-# 
+#
 #   for(i = 0; i < N; i++){
 #     name[0] = 'p';
 #     name[1] = '0' + i;
@@ -533,16 +533,16 @@ def exectest():
 #     name[0] = 'c';
 #     unlink(name);
 #   }
-# 
+#
 #   printf(1, "createdelete ok\n");
 # }
-# 
+#
 # // can I unlink a file and still read it?
 # void
 # unlinkread(void)
 # {
 #   int fd, fd1;
-# 
+#
 #   printf(1, "unlinkread test\n");
 #   fd = open("unlinkread", O_CREATE | O_RDWR);
 #   if(fd < 0){
@@ -551,7 +551,7 @@ def exectest():
 #   }
 #   write(fd, "hello", 5);
 #   close(fd);
-# 
+#
 #   fd = open("unlinkread", O_RDWR);
 #   if(fd < 0){
 #     printf(1, "open unlinkread failed\n");
@@ -561,11 +561,11 @@ def exectest():
 #     printf(1, "unlink unlinkread failed\n");
 #     exit();
 #   }
-# 
+#
 #   fd1 = open("unlinkread", O_CREATE | O_RDWR);
 #   write(fd1, "yyy", 3);
 #   close(fd1);
-# 
+#
 #   if(read(fd, buf, sizeof(buf)) != 5){
 #     printf(1, "unlinkread read failed");
 #     exit();
@@ -582,17 +582,17 @@ def exectest():
 #   unlink("unlinkread");
 #   printf(1, "unlinkread ok\n");
 # }
-# 
+#
 # void
 # linktest(void)
 # {
 #   int fd;
-# 
+#
 #   printf(1, "linktest\n");
-# 
+#
 #   unlink("lf1");
 #   unlink("lf2");
-# 
+#
 #   fd = open("lf1", O_CREATE|O_RDWR);
 #   if(fd < 0){
 #     printf(1, "create lf1 failed\n");
@@ -603,18 +603,18 @@ def exectest():
 #     exit();
 #   }
 #   close(fd);
-# 
+#
 #   if(link("lf1", "lf2") < 0){
 #     printf(1, "link lf1 lf2 failed\n");
 #     exit();
 #   }
 #   unlink("lf1");
-# 
+#
 #   if(open("lf1", 0) >= 0){
 #     printf(1, "unlinked lf1 but it is still there!\n");
 #     exit();
 #   }
-# 
+#
 #   fd = open("lf2", 0);
 #   if(fd < 0){
 #     printf(1, "open lf2 failed\n");
@@ -625,26 +625,26 @@ def exectest():
 #     exit();
 #   }
 #   close(fd);
-# 
+#
 #   if(link("lf2", "lf2") >= 0){
 #     printf(1, "link lf2 lf2 succeeded! oops\n");
 #     exit();
 #   }
-# 
+#
 #   unlink("lf2");
 #   if(link("lf2", "lf1") >= 0){
 #     printf(1, "link non-existant succeeded! oops\n");
 #     exit();
 #   }
-# 
+#
 #   if(link(".", "lf1") >= 0){
 #     printf(1, "link . lf1 succeeded! oops\n");
 #     exit();
 #   }
-# 
+#
 #   printf(1, "linktest ok\n");
 # }
-# 
+#
 # // test concurrent create and unlink of the same file
 # void
 # concreate(void)
@@ -656,7 +656,7 @@ def exectest():
 #     ushort inum;
 #     char name[14];
 #   } de;
-# 
+#
 #   printf(1, "concreate test\n");
 #   file[0] = 'C';
 #   file[2] = '\0';
@@ -681,7 +681,7 @@ def exectest():
 #     else
 #       wait();
 #   }
-# 
+#
 #   memset(fa, 0, sizeof(fa));
 #   fd = open(".", 0);
 #   n = 0;
@@ -703,12 +703,12 @@ def exectest():
 #     }
 #   }
 #   close(fd);
-# 
+#
 #   if(n != 40){
 #     printf(1, "concreate not enough files in directory listing\n");
 #     exit();
 #   }
-# 
+#
 #   for(i = 0; i < 40; i++){
 #     file[1] = '0' + i;
 #     pid = fork();
@@ -728,27 +728,27 @@ def exectest():
 #     else
 #       wait();
 #   }
-# 
+#
 #   printf(1, "concreate ok\n");
 # }
-# 
+#
 # // directory that uses indirect blocks
 # void
 # bigdir(void)
 # {
 #   int i, fd;
 #   char name[10];
-# 
+#
 #   printf(1, "bigdir test\n");
 #   unlink("bd");
-# 
+#
 #   fd = open("bd", O_CREATE);
 #   if(fd < 0){
 #     printf(1, "bigdir create failed\n");
 #     exit();
 #   }
 #   close(fd);
-# 
+#
 #   for(i = 0; i < 500; i++){
 #     name[0] = 'x';
 #     name[1] = '0' + (i / 64);
@@ -759,7 +759,7 @@ def exectest():
 #       exit();
 #     }
 #   }
-# 
+#
 #   unlink("bd");
 #   for(i = 0; i < 500; i++){
 #     name[0] = 'x';
@@ -771,23 +771,23 @@ def exectest():
 #       exit();
 #     }
 #   }
-# 
+#
 #   printf(1, "bigdir ok\n");
 # }
-# 
+#
 # void
 # subdir(void)
 # {
 #   int fd, cc;
-# 
+#
 #   printf(1, "subdir test\n");
-# 
+#
 #   unlink("ff");
 #   if(mkdir("dd") != 0){
 #     printf(1, "subdir mkdir dd failed\n");
 #     exit();
 #   }
-# 
+#
 #   fd = open("dd/ff", O_CREATE | O_RDWR);
 #   if(fd < 0){
 #     printf(1, "create dd/ff failed\n");
@@ -795,17 +795,17 @@ def exectest():
 #   }
 #   write(fd, "ff", 2);
 #   close(fd);
-#   
+#
 #   if(unlink("dd") >= 0){
 #     printf(1, "unlink dd (non-empty dir) succeeded!\n");
 #     exit();
 #   }
-# 
+#
 #   if(mkdir("/dd/dd") != 0){
 #     printf(1, "subdir mkdir dd/dd failed\n");
 #     exit();
 #   }
-# 
+#
 #   fd = open("dd/dd/ff", O_CREATE | O_RDWR);
 #   if(fd < 0){
 #     printf(1, "create dd/dd/ff failed\n");
@@ -813,7 +813,7 @@ def exectest():
 #   }
 #   write(fd, "FF", 2);
 #   close(fd);
-# 
+#
 #   fd = open("dd/dd/../ff", 0);
 #   if(fd < 0){
 #     printf(1, "open dd/dd/../ff failed\n");
@@ -825,12 +825,12 @@ def exectest():
 #     exit();
 #   }
 #   close(fd);
-# 
+#
 #   if(link("dd/dd/ff", "dd/dd/ffff") != 0){
 #     printf(1, "link dd/dd/ff dd/dd/ffff failed\n");
 #     exit();
 #   }
-# 
+#
 #   if(unlink("dd/dd/ff") != 0){
 #     printf(1, "unlink dd/dd/ff failed\n");
 #     exit();
@@ -839,7 +839,7 @@ def exectest():
 #     printf(1, "open (unlinked) dd/dd/ff succeeded\n");
 #     exit();
 #   }
-# 
+#
 #   if(chdir("dd") != 0){
 #     printf(1, "chdir dd failed\n");
 #     exit();
@@ -856,7 +856,7 @@ def exectest():
 #     printf(1, "chdir ./.. failed\n");
 #     exit();
 #   }
-# 
+#
 #   fd = open("dd/dd/ffff", 0);
 #   if(fd < 0){
 #     printf(1, "open dd/dd/ffff failed\n");
@@ -867,12 +867,12 @@ def exectest():
 #     exit();
 #   }
 #   close(fd);
-# 
+#
 #   if(open("dd/dd/ff", O_RDONLY) >= 0){
 #     printf(1, "open (unlinked) dd/dd/ff succeeded!\n");
 #     exit();
 #   }
-# 
+#
 #   if(open("dd/ff/ff", O_CREATE|O_RDWR) >= 0){
 #     printf(1, "create dd/ff/ff succeeded!\n");
 #     exit();
@@ -933,7 +933,7 @@ def exectest():
 #     printf(1, "chdir dd/xx succeeded!\n");
 #     exit();
 #   }
-# 
+#
 #   if(unlink("dd/dd/ffff") != 0){
 #     printf(1, "unlink dd/dd/ff failed\n");
 #     exit();
@@ -954,17 +954,17 @@ def exectest():
 #     printf(1, "unlink dd failed\n");
 #     exit();
 #   }
-# 
+#
 #   printf(1, "subdir ok\n");
 # }
-# 
+#
 # void
 # bigfile(void)
 # {
 #   int fd, i, total, cc;
-# 
+#
 #   printf(1, "bigfile test\n");
-# 
+#
 #   unlink("bigfile");
 #   fd = open("bigfile", O_CREATE | O_RDWR);
 #   if(fd < 0){
@@ -979,7 +979,7 @@ def exectest():
 #     }
 #   }
 #   close(fd);
-# 
+#
 #   fd = open("bigfile", 0);
 #   if(fd < 0){
 #     printf(1, "cannot open bigfile\n");
@@ -1010,18 +1010,18 @@ def exectest():
 #     exit();
 #   }
 #   unlink("bigfile");
-# 
+#
 #   printf(1, "bigfile test ok\n");
 # }
-# 
+#
 # void
 # fourteen(void)
 # {
 #   int fd;
-# 
+#
 #   // DIRSIZ is 14.
 #   printf(1, "fourteen test\n");
-# 
+#
 #   if(mkdir("12345678901234") != 0){
 #     printf(1, "mkdir 12345678901234 failed\n");
 #     exit();
@@ -1042,7 +1042,7 @@ def exectest():
 #     exit();
 #   }
 #   close(fd);
-# 
+#
 #   if(mkdir("12345678901234/12345678901234") == 0){
 #     printf(1, "mkdir 12345678901234/12345678901234 succeeded!\n");
 #     exit();
@@ -1051,10 +1051,10 @@ def exectest():
 #     printf(1, "mkdir 12345678901234/123456789012345 succeeded!\n");
 #     exit();
 #   }
-# 
+#
 #   printf(1, "fourteen ok\n");
 # }
-# 
+#
 # void
 # rmdot(void)
 # {
@@ -1093,14 +1093,14 @@ def exectest():
 #   }
 #   printf(1, "rmdot ok\n");
 # }
-# 
+#
 # void
 # dirfile(void)
 # {
 #   int fd;
-# 
+#
 #   printf(1, "dir vs file\n");
-# 
+#
 #   fd = open("dirfile", O_CREATE);
 #   if(fd < 0){
 #     printf(1, "create dirfile failed\n");
@@ -1137,7 +1137,7 @@ def exectest():
 #     printf(1, "unlink dirfile failed!\n");
 #     exit();
 #   }
-# 
+#
 #   fd = open(".", O_RDWR);
 #   if(fd >= 0){
 #     printf(1, "open . for writing succeeded!\n");
@@ -1149,18 +1149,18 @@ def exectest():
 #     exit();
 #   }
 #   close(fd);
-# 
+#
 #   printf(1, "dir vs file OK\n");
 # }
-# 
+#
 # // test that iput() is called at the end of _namei()
 # void
 # iref(void)
 # {
 #   int i, fd;
-# 
+#
 #   printf(1, "empty file name\n");
-# 
+#
 #   // the 50 is NINODE
 #   for(i = 0; i < 50 + 1; i++){
 #     if(mkdir("irefd") != 0){
@@ -1171,7 +1171,7 @@ def exectest():
 #       printf(1, "chdir irefd failed\n");
 #       exit();
 #     }
-# 
+#
 #     mkdir("");
 #     link("README", "");
 #     fd = open("", O_CREATE);
@@ -1182,11 +1182,11 @@ def exectest():
 #       close(fd);
 #     unlink("xx");
 #   }
-# 
+#
 #   chdir("/");
 #   printf(1, "empty file name OK\n");
 # }
-# 
+#
 # // test that fork fails gracefully
 # // the forktest binary also does this, but it runs out of proc entries first.
 # // inside the bigger usertests binary, we run out of memory first.
@@ -1194,9 +1194,9 @@ def exectest():
 # forktest(void)
 # {
 #   int n, pid;
-# 
+#
 #   printf(1, "fork test\n");
-# 
+#
 #   for(n=0; n<1000; n++){
 #     pid = fork();
 #     if(pid < 0)
@@ -1204,24 +1204,24 @@ def exectest():
 #     if(pid == 0)
 #       exit();
 #   }
-#   
+#
 #   if(n == 1000){
 #     printf(1, "fork claimed to work 1000 times!\n");
 #     exit();
 #   }
-#   
+#
 #   for(; n > 0; n--){
 #     if(wait() < 0){
 #       printf(1, "wait stopped early\n");
 #       exit();
 #     }
 #   }
-#   
+#
 #   if(wait() != -1){
 #     printf(1, "wait got too many\n");
 #     exit();
 #   }
-#   
+#
 #   printf(1, "fork test OK\n");
 # }
 
@@ -1243,7 +1243,7 @@ def main(argc, argv):
     # pipe1()
     # preempt()
     # exitwait()
-    # 
+    #
     # rmdot()
     # fourteen()
     # bigfile()

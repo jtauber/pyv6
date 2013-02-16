@@ -13,7 +13,8 @@ def grep(pattern, fd):
     while True:
         n, s = read(fd, 1024 - m)
         buf = buf[:m] + s
-        if n <= 0: break
+        if n <= 0:
+            break
         
         m += n
         p = buf
@@ -21,7 +22,8 @@ def grep(pattern, fd):
         # while (q = strchr(p, '\n')) != 0
         while True:
             q = strchr(p, "\n")
-            if q == 0: break
+            if q == 0:
+                break
             
             q = "\0" + q[1:]
             if match(pattern, p):
@@ -44,7 +46,7 @@ def main(argc, argv):
         exit_()
     pattern = argv[1]
     
-    if argc <=2:
+    if argc <= 2:
         grep(pattern, 0)
         exit_()
     
@@ -65,11 +67,12 @@ def match(re, text):
     if re[0] == "^":
         return matchhere(re[1:], text)
     
-    while True: # must look at empty string
+    while True:  # must look at empty string
         if matchhere(re, text):
             return True
         text = text[1:]
-        if text == "": break
+        if text == "":
+            break
     
     return False
 
@@ -89,7 +92,7 @@ def matchhere(re, text):
 
 # matchstar: search for c*re at beginning of text
 def matchstar(c, re, text):
-    while True: # a * matches zero or more instances
+    while True:  # a * matches zero or more instances
         if matchhere(re, text):
             return True
         if text == "":

@@ -4,9 +4,10 @@ from printf import printf
 
 from user import T_FILE, T_DIR
 
-DIRSIZ = 14 # @@@
+DIRSIZ = 14  # @@@
 
 #include "fs.h"
+
 
 def fmtname(path):
     # static char buf[DIRSIZ+1];
@@ -51,11 +52,11 @@ def ls(path):
             
             #while (read(fd, &de, sizeof(de)) == sizeof(de))
             while True:
-                n, de = read(fd, 20) # @@@ 20 = sizeof(de)
+                n, de = read(fd, 20)  # @@@ 20 = sizeof(de)
                 if n != 20:
                     break
                 de_inum = int(de[:6])
-                de_name = de[6:].strip() # @@@
+                de_name = de[6:].strip()  # @@@
                 
                 if de_inum == 0:
                     continue
@@ -63,8 +64,8 @@ def ls(path):
                 
                 n, st = stat(path)
                 if n < 0:
-                    printf(1, "ls: cannot stat %s\n", path);
-                    continue;
+                    printf(1, "ls: cannot stat %s\n", path)
+                    continue
                 
                 printf(1, "%s %d %d %d\n", fmtname(path), st.type, st.ino, st.size)
     close(fd)
