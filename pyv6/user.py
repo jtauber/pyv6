@@ -2,8 +2,10 @@
 # from printf import printf
 
 from mock import mock_open, mock_read, mock_write, mock_close, mock_fstat, mock_unlink, mock_exec, mock_exit, mock_fork, mock_wait
-# from mock import O_RDONLY, O_RDWR, O_WRONLY, O_CREATE
-# from mock import T_FILE, T_DIR
+
+# linter will complain these are used but they are imported from this module elsewhere
+from mock import O_RDONLY, O_RDWR, O_WRONLY, O_CREATE
+from mock import T_FILE, T_DIR
 
 
 # system call stubs
